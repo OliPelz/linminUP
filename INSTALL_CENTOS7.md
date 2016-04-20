@@ -20,6 +20,23 @@ $ git clone git@github.com:OliPelz/linminUP.git .
 $ for pkg in numpy watchdog h5py cython biopython simplemysql configargparse psutil mlpy ; do pip install $pkg; done 
 ```
 
+now we need to install some additional packages which cannot be found / compiled with pip and needed for minUP
+first install the CentOS gsl devel package
+```
+yum install gsl-devel
+```
+ 
+next we need to install mlpy (from Github and not from sourceforge because we need the latest version)
+```
+mkdir ~/src
+cd $_
+git clone https://github.com/lukauskas/mlpy.git
+cd mlpy
+python setup.py install
+```
+finally install ```pygsl``` version ```2.2.0``` from sourceforge
+TODO
+
 Create a bash script we will call instead of minUP.py (since we use a custom python 2.7.6 which is not the system python - otherwise skip this step)
 
 Fix minUP.py shebang to work with our custom virtualenv python (command tested for minUP 0.63).
