@@ -36,3 +36,33 @@ export PATH=/software/minUP:$PATH
 cd 
 minUP.py --help
 ```
+
+
+As I dont want to use minUP.py as a server systemd or init script but want users to conveniently start/stop the script I wrap/put it in the following bash script
+
+TODO: non functional - not working
+```bash
+#!/bin/bash
+Pidfile=/software/minUP/minUP.pid
+
+# read in pid file
+if [ -f $Pidfile ]
+   echo "seems like the minUP process is already running. try script stop_minUP.sh"
+   exit 1
+fi
+
+nohup minUP.py $@ &> /dev/null &
+if [ $? eq 0]
+then
+  echo $! > $Pidfile
+fi
+```
+TODO: non functional not working
+```
+f [ -f $Pidfile ] ; then
+				echo "stopping $INSTANZ"
+				kill -15 $Pid
+		else
+				echo "Cannot stop $INSTANZ - no Pidfile found!"
+		fi
+```

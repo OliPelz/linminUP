@@ -69,30 +69,59 @@ if __name__ == '__main__':
     global last_index_dir
     xml_file_dict = dict()
 
+# just parse the configfile parameter up to now
+    parser = \
+        configargparse.ArgParser(description='minup: A program to analyse minION fast5 files in real-time or post-run.'
+                                 , default_config_files=[])
+    parser.add( # MS ...
+        '-a',
+        '--configfile',
+        required=False,
+        type=str,
+        dest='configfile'
+        )
+    parser.add( # MS ...
+        '-e',
+        '--outputdir',
+        required=False,
+        type=str,
+        dest='outputdir'
+        )
+    
+    args = parser.parse_args()
+ 
+    config_file = args.configfile
+    output_dir  = args.outputdir
+    # bad hack but I dont see any other way since there is no getter method for setting a default_config_files object after constructor
+    parser._default_config_files = [config_file]
                 # # linux version
 
     if oper is 'linux':
-# get minion's working directory
-        config_file = os.path.join(os.path.sep,
+        config_file = config_file if config_file is not None else
+                         os.path.join(os.path.sep,
                                    os.path.dirname(os.path.realpath('__file__'
                                    )), '/minup_posix.config')
-        logfolder = os.path.join(os.path.sep,
+        logfolder = output_dir."/minup_run_logs" if output_dir is not None else
+			os.path.join(os.path.sep,
                                  os.path.dirname(os.path.realpath('__file__'
                                  )), 'minup_run_logs')
-        valid_ref_dir = os.path.join(os.path.sep,
+        valid_ref_dir = output_dir."/valid_reference_fasta_files" if output_dir is not None else
+			os.path.join(os.path.sep,
                 os.path.dirname(os.path.realpath('__file__')),
                 'valid_reference_fasta_files')
-        bwa_index_dir = os.path.join(os.path.sep,
+        bwa_index_dir = output_dir."/bwa_indexes" if output_dir is not None else
+			os.path.join(os.path.sep,
                 os.path.dirname(os.path.realpath('__file__')),
                 'bwa_indexes')
-        last_index_dir = os.path.join(os.path.sep,
+        last_index_dir = output_dir."/last_indexes" if output_dir is not None else
+				os.path.join(os.path.sep,
                 os.path.dirname(os.path.realpath('__file__')),
                 'last_indexes')
 
                 # # windows version
 
     if oper is 'windows':
-        config_file = os.path.join(os.path.sep, sys.prefix,
+        config_file =  os.path.join(os.path.sep, sys.prefix,
                                    'minup_windows.config')
         logfolder = os.path.join(os.path.sep, sys.prefix,
                                  'minup_run_logs')
@@ -112,9 +141,7 @@ if __name__ == '__main__':
     if not os.path.exists(last_index_dir):
         os.makedirs(last_index_dir)
 
-    parser = \
-        configargparse.ArgParser(description='minup: A program to analyse minION fast5 files in real-time or post-run.'
-                                 , default_config_files=[config_file])
+
     parser.add(
         '-dbh',
         '--mysql-host',
