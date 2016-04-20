@@ -1,0 +1,3 @@
+* minUP should be run from everywhere 
+** fixed minUP.py dependency to its subfolder 'modules' so we can run it from everywhere and do not have to be in the minUP folder all the time
+

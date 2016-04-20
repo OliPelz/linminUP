@@ -1,0 +1,5 @@
+.venv/*
+*.swp
+modules/*.swp
+*.pyc
+modules/*.pyc
