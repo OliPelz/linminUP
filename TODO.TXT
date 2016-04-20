@@ -1,0 +1,1 @@
+I did not touch the windows part of minUP.py and I dont know why this is in the source at all as the project name states it is for linux
