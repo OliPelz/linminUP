@@ -1,3 +1,6 @@
 * minUP should be run from everywhere 
-** fixed minUP.py dependency to its subfolder 'modules' so we can run it from everywhere and do not have to be in the minUP folder all the time
+** I thing this is a design mistake when running in a server environment. I fixed minUP.py dependency to its subfolder 'modules' so we can run it from everywhere and do not have to be in the minUP folder all the time
+
+* minUP should allow adding custom minUP Linux Config files (custom filenames and folders)
+** I think this is a design mistake when running in a server environment. The minUP config files should not be in the minUP folder where the binaries are because I put these binaries in a system bin folder where not everybody should have permissions to change anything.
 

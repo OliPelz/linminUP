@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/software/minUP/.venv/bin/python
 # -*- coding: utf-8 -*-
 
 # --------------------------------------------------
@@ -28,7 +28,7 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)  # MS
 sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)  # MS
 
 
-sys.path.append('modules')
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/modules')
 from exitGracefully import terminateSubProcesses
 from processRefFasta import process_ref_fasta
 from telem import *
@@ -72,9 +72,10 @@ if __name__ == '__main__':
                 # # linux version
 
     if oper is 'linux':
+# get minion's working directory
         config_file = os.path.join(os.path.sep,
                                    os.path.dirname(os.path.realpath('__file__'
-                                   )), 'minup_posix.config')
+                                   )), '/minup_posix.config')
         logfolder = os.path.join(os.path.sep,
                                  os.path.dirname(os.path.realpath('__file__'
                                  )), 'minup_run_logs')
