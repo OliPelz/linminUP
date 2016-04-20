@@ -17,7 +17,7 @@ Install Linux minup latest and ALL dependencies for minUP.py. Dont forget to sou
 ```
 $ cd /opt/minUP
 $ git clone git@github.com:OliPelz/linminUP.git .
-$ for pkg in numpy watchdog h5py cython biopython simplemysql configargparse psutil ; do pip install $pkg; done 
+$ for pkg in numpy watchdog h5py cython biopython simplemysql configargparse psutil mlpy ; do pip install $pkg; done 
 ```
 
 Create a bash script we will call instead of minUP.py (since we use a custom python 2.7.6 which is not the system python - otherwise skip this step)
@@ -26,13 +26,13 @@ Fix minUP.py shebang to work with our custom virtualenv python (command tested f
 You are likely to skip this step if your virtualenv python is the same as the system python (which in my example is not). Dont forget to source your virtualenv before ```source /opt/minUP/.venv/bin/activate```if not done already
 ```bash
 $ MYPY=$(echo `which python`)
-$ sed -i "s~\\/usr\/bin\/python~$MYPY~g" /software/minUP/minUP.py 
+$ sed -i "s~\\/usr\/bin\/python~$MYPY~g" /opt/minUP/minUP.py 
 ```
 
 Now you can run it from anywhere as user minion
 ```bash
-chmod +x /software/minUP/minUP.py
-export PATH=/software/minUP:$PATH
+chmod +x /opt/minUP/minUP.py
+export PATH=/opt/minUP:$PATH
 cd 
 minUP.py --help
 ```
@@ -40,10 +40,10 @@ minUP.py --help
 
 As I dont want to use minUP.py as a server systemd or init script but want users to conveniently start/stop the script I wrap/put it in the following bash script
 
-TODO: non functional - not working
+start_minUP.sh:
 ```bash
 #!/bin/bash
-Pidfile=/software/minUP/minUP.pid
+Pidfile=/opt/minUP/minUP.pid
 
 # read in pid file
 if [ -f $Pidfile ]
@@ -57,12 +57,63 @@ then
   echo $! > $Pidfile
 fi
 ```
-TODO: non functional not working
+
+stop_minUP.sh
 ```
-f [ -f $Pidfile ] ; then
-				echo "stopping $INSTANZ"
-				kill -15 $Pid
-		else
-				echo "Cannot stop $INSTANZ - no Pidfile found!"
-		fi
+#!/bin/bash
+Pidfile=/opt/minUP/minUP.pid
+
+if [ -f $Pidfile ] ; then
+   echo "stopping minUP"
+   kill -15 $Pid
+   if [ $? eq 0 ]
+   then
+     echo "...done"
+   else 
+     echo "...error while trying to stop minUP"
+     exit 0
+   fi
+   rm -f $Pidfile
+   exit 0
+else
+   echo "Cannot stop minUP- no Pidfile found, process seems not to run"
+   exit 1
+fi
+```
+
+make executable
+```
+chmod +x /opt/minUP/start_minUP.sh
+chmod +x /opt/minUP/stop_minUP.sh
+```
+
+
+example to use the scripts
+in my example I can access a shared nfs mount both on the server minion is running and also locally under ```/mnt/data```
+I have uploaded the minotour testdata into ```/mnt/data/minion-test-data-set```
+so everything can be done locally:
+```
+$ echo "
+[Defaults]
+mysql-host=192.168.1.10
+mysql-username=dykvandyke
+mysql-password=xxxx
+mysql-port=3306
+align-ref-fasta=/mnt/data/minion-test-data-set/demo_data_set/reference
+watch-dir=/home/mnt/data/minion-test-data-set/demo_data_set/downloads
+minotour-username=dykvandyke
+#minotour-sharing-usernames=
+flowcell-owner=olip
+#run-number=
+" > /mnt/data/minion.config
+```
+Now start the run locally using ssh
+```
+MINOUT=/mnt/data/minUP-`date +'%s'`
+ssh minion@server mkdir $MINOUT
+ssh minion@server /opt/minUP/start_minUP.sh -e $MINOUT  
+```
+
+```
+/software/minUP/minUP.py  -a /home/minion/minoTour-data/minup_posix.config
 ```

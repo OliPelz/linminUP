@@ -93,28 +93,23 @@ if __name__ == '__main__':
     config_file = args.configfile
     output_dir  = args.outputdir
     # bad hack but I dont see any other way since there is no getter method for setting a default_config_files object after constructor
-    parser._default_config_files = [config_file]
+    parser._default_config_files = [config_file] if config_file is not None else []
                 # # linux version
 
     if oper is 'linux':
-        config_file = config_file if config_file is not None else
-                         os.path.join(os.path.sep,
+        config_file = config_file if config_file is not None else os.path.join(os.path.sep,
                                    os.path.dirname(os.path.realpath('__file__'
                                    )), '/minup_posix.config')
-        logfolder = output_dir."/minup_run_logs" if output_dir is not None else
-			os.path.join(os.path.sep,
+        logfolder = output_dir + "/minup_run_logs" if output_dir is not None else os.path.join(os.path.sep,
                                  os.path.dirname(os.path.realpath('__file__'
                                  )), 'minup_run_logs')
-        valid_ref_dir = output_dir."/valid_reference_fasta_files" if output_dir is not None else
-			os.path.join(os.path.sep,
+        valid_ref_dir = output_dir + "/valid_reference_fasta_files" if output_dir is not None else os.path.join(os.path.sep,
                 os.path.dirname(os.path.realpath('__file__')),
                 'valid_reference_fasta_files')
-        bwa_index_dir = output_dir."/bwa_indexes" if output_dir is not None else
-			os.path.join(os.path.sep,
+        bwa_index_dir = output_dir + "/bwa_indexes" if output_dir is not None else os.path.join(os.path.sep,
                 os.path.dirname(os.path.realpath('__file__')),
                 'bwa_indexes')
-        last_index_dir = output_dir."/last_indexes" if output_dir is not None else
-				os.path.join(os.path.sep,
+        last_index_dir = output_dir + "/last_indexes" if output_dir is not None else os.path.join(os.path.sep,
                 os.path.dirname(os.path.realpath('__file__')),
                 'last_indexes')
 
