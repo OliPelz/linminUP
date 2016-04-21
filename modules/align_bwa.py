@@ -125,22 +125,33 @@ def do_bwa_align(
     # cmd='cat %s.fasta | bwa mem -x ont2d -T0 %s.bwa.index -' % (basename, ref_fasta_hash[dbname]["prefix"])
 
     read = '>%s \r\n%s' % (seqid, fastqhash['seq'])
-
+    import os, tempfile
+    # create a new temp file in the dir where the reference fastas are
+    bwaTmpDir = os.path.dirname(os.path.realpath(ref_fasta_hash[dbname]['bwa_index']))
+    f = tempfile.NamedTemporaryFile(dir=bwaTmpDir, delete=False)
+    f.write(read)
+    f.close()
     if args.verbose is True:
     	#read = read + '\r\n' + read # MS
     	print read
     	print "-"*80
 
-    cmd = 'bwa mem -x ont2d %s %s -' % (options,
-            ref_fasta_hash[dbname]['bwa_index'])
+    cmd = 'bwa mem -x ont2d %s %s %s' % (options,
+            ref_fasta_hash[dbname]['bwa_index'], f.name)
 
     #print cmd
+    scriptDir = os.path.dirname(os.path.realpath(__file__))
 
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            stdin=subprocess.PIPE, shell=True)
-    (out, err) = proc.communicate(input=read)
-    status = proc.wait()
+    cmd = ["qsub", "-I", "-x", "-v", "CMD=" + cmd, "-N", "'run_bwa_align'",  scriptDir + "/../openpbs.sh"]
+    print cmd
+    out = subprocess.check_output(cmd)
+    print out
+    import os; os._exit(1)
+    #proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+    #                        stderr=subprocess.PIPE,
+    #                        stdin=subprocess.PIPE, shell=True)
+    #(out, err) = proc.communicate(input=read)
+    #status = proc.wait()
 
     # print "BWA Error", err
 

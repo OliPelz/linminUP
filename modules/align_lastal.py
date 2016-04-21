@@ -127,8 +127,12 @@ def do_last_align(
     options = '-' + args.last_options.replace(',', ' -')
     cmd = str()
     if oper is 'linux':
+        import os
+        scriptDir = os.path.dirname(os.path.realpath(__file__))
         cmd = 'lastal %s  %s -' % (options,
                                    ref_fasta_hash[dbname]['last_index'])
+        cmd = "qsub -I -v CMD='" + cmd + "' -N 'run_lastal_align' " + scriptDir + "/../openpbs.sh"
+
     if oper is 'windows':
         cmd = 'lastal %s  %s ' % (options,
                                   ref_fasta_hash[dbname]['last_index'])

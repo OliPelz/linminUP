@@ -18,6 +18,7 @@ import numpy as np
 import subprocess
 
 
+
 # ---------------------------------------------------------------------------
 
 # def scale(a): return a / np.max(a) # MS
@@ -143,6 +144,7 @@ def process_ref_fasta(
             refdict['kmer'][record.id] = km
 
     if args.last_align is True:
+        scriptDir = os.path.dirname(os.path.realpath(__file__))
         last_index = os.path.join(os.path.sep, last_index_dir,
                                   ref_basename + '.last.index')
         last_index_file_part = os.path.join(os.path.sep,
@@ -151,6 +153,7 @@ def process_ref_fasta(
             or os.stat(last_index_file_part).st_size == 0:
             print 'Building LAST index for reference fasta...'
             cmd = 'lastdb -Q 0 %s %s' % (last_index, validated_ref)  # format the database
+            cmd = "qsub -I -x -v CMD='" + cmd + "' -N 'last_index_build' " + scriptDir + "/../openpbs.sh"   
             if args.verbose is True:
                 print cmd
             proc = subprocess.Popen(cmd, shell=True)
@@ -158,6 +161,7 @@ def process_ref_fasta(
         refdict['last_index'] = last_index
 
     if args.bwa_align is True:
+        scriptDir = os.path.dirname(os.path.realpath(__file__))
         bwa_index = os.path.join(os.path.sep, bwa_index_dir,
                                  ref_basename + '.bwa.index')
         bwa_index_file_part = os.path.join(os.path.sep, bwa_index_dir,
@@ -166,7 +170,8 @@ def process_ref_fasta(
             or os.stat(bwa_index_file_part).st_size == 0:
             print 'Building BWA index for reference fasta...'
             cmd = 'bwa index -p %s %s' % (bwa_index, validated_ref)  # format the database
-            if args.verbose is True:
+            cmd = "qsub -I -x  -v CMD='" + cmd + "' -N 'bwa_index_build' " + scriptDir + "/../openpbs.sh"
+	    if args.verbose is True:
                 print cmd
             proc = subprocess.Popen(cmd, shell=True)
             status = proc.wait()
