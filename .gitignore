@@ -1,3 +1,4 @@
+minUP.pid
 .venv/*
 *.swp
 modules/*.swp

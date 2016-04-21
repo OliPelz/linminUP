@@ -132,7 +132,7 @@ ssh minion@server mkdir $MINOUT
 ssh minion@server /opt/minUP/start_minUP.sh -e $MINOUT -a /home/minion/minoTour-data/minup_posix.config
 ```
 
-now finally run
+now finally run using a custom path config file and output dir 
 ```
-/software/minUP/minUP.py  -a /home/minion/minoTour-data/minup_posix.config -o /home/minion/minoTour-output
+/software/minUP/minUP.py -d  -a /home/minion/minoTour-data/minup_posix.config -e /home/minion/minoTour-output-today
 ```

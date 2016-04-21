@@ -69,69 +69,18 @@ if __name__ == '__main__':
     global last_index_dir
     xml_file_dict = dict()
 
-# just parse the configfile parameter up to now
-    def extractConfigFileParams():
-       tempParser = configargparse.getArgumentParser()
-       tempParser.add_argument("-a", "--config-file", dest='configfile', help="full path to a minUP configuration file, default will be 'minup_posix.config'< in the minUP directory")
-       tempParser.add_argument("-e", "--output-dir", dest='', help="directory for any output file: minUP log file, bwa alignment files etc.") 
-       myParser = tempParser.parse_known_args()
-       return myParser.configfile, myParser.outputdir
-  
-    config_file, output_dir  = extractConfigFileParams()
-    # bad hack but I dont see any other way since there is no getter method for setting a default_config_files object after constructor
-    parser._default_config_files = [config_file] if config_file is not None else []
-                # # linux version
-
-    if oper is 'linux':
-        config_file = config_file if config_file is not None else os.path.join(os.path.sep,
-                                   os.path.dirname(os.path.realpath('__file__'
-                                   )), '/minup_posix.config')
-        logfolder = output_dir + "/minup_run_logs" if output_dir is not None else os.path.join(os.path.sep,
-                                 os.path.dirname(os.path.realpath('__file__'
-                                 )), 'minup_run_logs')
-        valid_ref_dir = output_dir + "/valid_reference_fasta_files" if output_dir is not None else os.path.join(os.path.sep,
-                os.path.dirname(os.path.realpath('__file__')),
-                'valid_reference_fasta_files')
-        bwa_index_dir = output_dir + "/bwa_indexes" if output_dir is not None else os.path.join(os.path.sep,
-                os.path.dirname(os.path.realpath('__file__')),
-                'bwa_indexes')
-        last_index_dir = output_dir + "/last_indexes" if output_dir is not None else os.path.join(os.path.sep,
-                os.path.dirname(os.path.realpath('__file__')),
-                'last_indexes')
-
-                # # windows version
-
-    if oper is 'windows':
-        config_file =  os.path.join(os.path.sep, sys.prefix,
-                                   'minup_windows.config')
-        logfolder = os.path.join(os.path.sep, sys.prefix,
-                                 'minup_run_logs')
-        valid_ref_dir = os.path.join(os.path.sep, sys.prefix,
-                'valid_reference_fasta_files')
-        bwa_index_dir = os.path.join(os.path.sep, sys.prefix,
-                'bwa_indexes')
-        last_index_dir = os.path.join(os.path.sep, sys.prefix,
-                'last_indexes')
-
-    if not os.path.exists(logfolder):
-        os.makedirs(logfolder)
-    if not os.path.exists(valid_ref_dir):
-        os.makedirs(valid_ref_dir)
-    if not os.path.exists(bwa_index_dir):
-        os.makedirs(bwa_index_dir)
-    if not os.path.exists(last_index_dir):
-        os.makedirs(last_index_dir)
 
     parser = \
         configargparse.ArgParser(description='minup: A program to analyse minION fast5 files in real-time or post-run.'
                                  , default_config_files=[])
     parser.add( # MS ...
         '-a',
-        '--configfile',
+        '--config-file',
         required=False,
         type=str,
         dest='configfile',
-        help='full path to a minUP configuration file, default will be "minup_posix.config" in the minUP directory'
+        help='full path to a minUP configuration file, default will be "minup_posix.config" in the minUP directory',
+        is_config_file_arg=True
         )
     parser.add( # MS ...
         '-e',
@@ -442,6 +391,54 @@ if __name__ == '__main__':
                                                                # MS
 
     args = parser.parse_args()
+
+    config_file = args.configfile
+    output_dir  = args.outputdir
+                # # linux version
+
+    if oper is 'linux':
+        config_file = config_file if config_file is not None else os.path.join(os.path.sep,
+                                   os.path.dirname(os.path.realpath('__file__'
+                                   )), '/minup_posix.config')
+        logfolder = output_dir + "/minup_run_logs" if output_dir is not None else os.path.join(os.path.sep,
+                                 os.path.dirname(os.path.realpath('__file__'
+                                 )), 'minup_run_logs')
+        valid_ref_dir = output_dir + "/valid_reference_fasta_files" if output_dir is not None else os.path.join(os.path.sep,
+                os.path.dirname(os.path.realpath('__file__')),
+                'valid_reference_fasta_files')
+        bwa_index_dir = output_dir + "/bwa_indexes" if output_dir is not None else os.path.join(os.path.sep,
+                os.path.dirname(os.path.realpath('__file__')),
+                'bwa_indexes')
+        last_index_dir = output_dir + "/last_indexes" if output_dir is not None else os.path.join(os.path.sep,
+                os.path.dirname(os.path.realpath('__file__')),
+                'last_indexes')
+
+                # # windows version
+
+    if oper is 'windows':
+        config_file =  os.path.join(os.path.sep, sys.prefix,
+                                   'minup_windows.config')
+        logfolder = os.path.join(os.path.sep, sys.prefix,
+                                 'minup_run_logs')
+        valid_ref_dir = os.path.join(os.path.sep, sys.prefix,
+                'valid_reference_fasta_files')
+        bwa_index_dir = os.path.join(os.path.sep, sys.prefix,
+                'bwa_indexes')
+        last_index_dir = os.path.join(os.path.sep, sys.prefix,
+                'last_indexes')
+
+    if not os.path.exists(logfolder):
+        os.makedirs(logfolder)
+    if not os.path.exists(valid_ref_dir):
+        os.makedirs(valid_ref_dir)
+    if not os.path.exists(bwa_index_dir):
+        os.makedirs(bwa_index_dir)
+    if not os.path.exists(last_index_dir):
+        os.makedirs(last_index_dir)
+
+
+
+
 
     # Check inputs are OK...
     if not okSQLname(args.custom_name): # MS
