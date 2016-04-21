@@ -70,28 +70,14 @@ if __name__ == '__main__':
     xml_file_dict = dict()
 
 # just parse the configfile parameter up to now
-    parser = \
-        configargparse.ArgParser(description='minup: A program to analyse minION fast5 files in real-time or post-run.'
-                                 , default_config_files=[])
-    parser.add( # MS ...
-        '-a',
-        '--configfile',
-        required=False,
-        type=str,
-        dest='configfile'
-        )
-    parser.add( # MS ...
-        '-e',
-        '--outputdir',
-        required=False,
-        type=str,
-        dest='outputdir'
-        )
-    
-    args = parser.parse_args()
- 
-    config_file = args.configfile
-    output_dir  = args.outputdir
+    def extractConfigFileParams():
+       tempParser = configargparse.getArgumentParser()
+       tempParser.add_argument("-a", "--config-file", dest='configfile', help="full path to a minUP configuration file, default will be 'minup_posix.config'< in the minUP directory")
+       tempParser.add_argument("-e", "--output-dir", dest='', help="directory for any output file: minUP log file, bwa alignment files etc.") 
+       myParser = tempParser.parse_known_args()
+       return myParser.configfile, myParser.outputdir
+  
+    config_file, output_dir  = extractConfigFileParams()
     # bad hack but I dont see any other way since there is no getter method for setting a default_config_files object after constructor
     parser._default_config_files = [config_file] if config_file is not None else []
                 # # linux version
@@ -136,6 +122,25 @@ if __name__ == '__main__':
     if not os.path.exists(last_index_dir):
         os.makedirs(last_index_dir)
 
+    parser = \
+        configargparse.ArgParser(description='minup: A program to analyse minION fast5 files in real-time or post-run.'
+                                 , default_config_files=[])
+    parser.add( # MS ...
+        '-a',
+        '--configfile',
+        required=False,
+        type=str,
+        dest='configfile',
+        help='full path to a minUP configuration file, default will be "minup_posix.config" in the minUP directory'
+        )
+    parser.add( # MS ...
+        '-e',
+        '--output-dir',
+        required=False,
+        type=str,
+        dest='outputdir',
+        help='directory for any output file: minUP log file, bwa alignment files etc.'
+        )
 
     parser.add(
         '-dbh',

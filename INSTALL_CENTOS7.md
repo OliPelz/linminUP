@@ -57,14 +57,14 @@ minUP.py --help
 
 As I dont want to use minUP.py as a server systemd or init script but want users to conveniently start/stop the script I wrap/put it in the following bash script
 
-start_minUP.sh:
+/opt/minUP/start_minUP.sh:
 ```bash
 #!/bin/bash
 Pidfile=/opt/minUP/minUP.pid
 
 # read in pid file
 if [ -f $Pidfile ]
-   echo "seems like the minUP process is already running. try script stop_minUP.sh"
+   echo 'seems like the minUP process is already running. try script stop_minUP.sh'
    exit 1
 fi
 
@@ -121,6 +121,7 @@ watch-dir=/home/mnt/data/minion-test-data-set/demo_data_set/downloads
 minotour-username=dykvandyke
 #minotour-sharing-usernames=
 flowcell-owner=olip
+#output-dir=
 #run-number=
 " > /mnt/data/minion.config
 ```
@@ -128,9 +129,10 @@ Now start the run locally using ssh
 ```
 MINOUT=/mnt/data/minUP-`date +'%s'`
 ssh minion@server mkdir $MINOUT
-ssh minion@server /opt/minUP/start_minUP.sh -e $MINOUT  
+ssh minion@server /opt/minUP/start_minUP.sh -e $MINOUT -a /home/minion/minoTour-data/minup_posix.config
 ```
 
+now finally run
 ```
-/software/minUP/minUP.py  -a /home/minion/minoTour-data/minup_posix.config
+/software/minUP/minUP.py  -a /home/minion/minoTour-data/minup_posix.config -o /home/minion/minoTour-output
 ```
