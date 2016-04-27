@@ -13,6 +13,7 @@
 import re
 import subprocess
 import threading
+import os, tempfile
 
 class last_threader(threading.Thread):
 
@@ -126,29 +127,39 @@ def do_last_align(
 
     options = '-' + args.last_options.replace(',', ' -')
     cmd = str()
+    read = '>%s \r\n%s' % (qname, fastqhash['seq'])
+    lastTmpDir = os.path.dirname(os.path.realpath(ref_fasta_hash[dbname]['last_index']))
+    f = tempfile.NamedTemporaryFile(dir=lastTmpDir, delete=False)
+    f.write(read)
+    f.close()
+    scriptDir = os.path.dirname(os.path.realpath(__file__)) 
     if oper is 'linux':
-        import os
-        scriptDir = os.path.dirname(os.path.realpath(__file__))
-        cmd = 'lastal %s  %s -' % (options,
-                                   ref_fasta_hash[dbname]['last_index'])
-        cmd = "qsub -I -v CMD='" + cmd + "' -N 'run_lastal_align' " + scriptDir + "/../openpbs.sh"
-
+        cmd = 'lastal %s  %s %s' % (options,
+                                   ref_fasta_hash[dbname]['last_index'], f.name)
+        cmd = ["qsub", "-I", "-x", "-v", "CMD=" + cmd, "-N", "'run_bwa_align'",  scriptDir + "/../openpbs.sh"]
     if oper is 'windows':
         cmd = 'lastal %s  %s ' % (options,
                                   ref_fasta_hash[dbname]['last_index'])
-
-    read = '>%s \r\n%s' % (qname, fastqhash['seq'])
-
+    out = None
+    err = None
+    try:
+      out = subprocess.check_output(cmd)
+    except subprocess.CalledProcessError, e:
+      err = e.output
+    print out
+    import os; os._exit(1)
+    
     # print cmd
 
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            stdin=subprocess.PIPE, shell=True)
-    (out, err) = proc.communicate(input=read)
+    #proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+    #                        stderr=subprocess.PIPE,
+    #                        stdin=subprocess.PIPE, shell=True)
+    #(out, err) = proc.communicate(input=read)
 
     # print err
 
-    status = proc.wait()
+    #status = proc.wait()
+    
     maf = out.encode('utf-8')
     lines = maf.splitlines()
 

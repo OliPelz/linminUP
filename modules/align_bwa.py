@@ -14,7 +14,9 @@ import re
 import sys
 import subprocess
 import threading
+import os, tempfile
 
+from pbs_utils import PBSUtils
 from cigar import translate_cigar_mdflag_to_reference
 
 
@@ -42,6 +44,9 @@ class bwa_threader(threading.Thread):
         self.db = db
         self.args = args
         self.ref_fasta_hash = ref_fasta_hash
+        self.bwaTmpDir = os.path.dirname(os.path.realpath(ref_fasta_hash[dbname]['bwa_index']))
+        self.pbs_utils = PBSUtils(self.bwaTmpDir, verbose = False)
+
 
     def run(self):
         do_bwa_align(
@@ -53,6 +58,8 @@ class bwa_threader(threading.Thread):
             self.basenameid,
             self.dbname,
             self.db,
+            self.bwaTmpDir,
+            self.pbs_utils
             )
 
 
@@ -91,7 +98,7 @@ def init_bwa_threads(
 
 # ---------------------------------------------------------------------------
 
-def do_bwa_align(
+def do_bwa_align( 
     args,
     ref_fasta_hash,
     seqid,
@@ -100,6 +107,8 @@ def do_bwa_align(
     basenameid,
     dbname,
     db,
+    bwaTmpDir,
+    pbs_utils
     ):
     cursor = db.cursor()
 
@@ -125,12 +134,12 @@ def do_bwa_align(
     # cmd='cat %s.fasta | bwa mem -x ont2d -T0 %s.bwa.index -' % (basename, ref_fasta_hash[dbname]["prefix"])
 
     read = '>%s \r\n%s' % (seqid, fastqhash['seq'])
-    import os, tempfile
     # create a new temp file in the dir where the reference fastas are
-    bwaTmpDir = os.path.dirname(os.path.realpath(ref_fasta_hash[dbname]['bwa_index']))
+    # for pbs this needs to be on a nfs share
     f = tempfile.NamedTemporaryFile(dir=bwaTmpDir, delete=False)
     f.write(read)
     f.close()
+    
     if args.verbose is True:
     	#read = read + '\r\n' + read # MS
     	print read
@@ -138,15 +147,21 @@ def do_bwa_align(
 
     cmd = 'bwa mem -x ont2d %s %s %s' % (options,
             ref_fasta_hash[dbname]['bwa_index'], f.name)
+ 
 
-    #print cmd
-    scriptDir = os.path.dirname(os.path.realpath(__file__))
+   # run locally
 
-    cmd = ["qsub", "-I", "-x", "-v", "CMD=" + cmd, "-N", "'run_bwa_align'",  scriptDir + "/../openpbs.sh"]
-    print cmd
-    out = subprocess.check_output(cmd)
-    print out
-    import os; os._exit(1)
+# TODO: error correction, deletion of temp file
+    result = pbs_utils.run_command_qsub_output('bwa-aligning', cmd )
+    out, stderrFileContent = result
+
+    
+
+
+#    cmd = 'bwa mem -x ont2d %s %s %s' % (options,
+#            ref_fasta_hash[dbname]['bwa_index'], f.name)
+    
+
     #proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
     #                        stderr=subprocess.PIPE,
     #                        stdin=subprocess.PIPE, shell=True)
@@ -154,7 +169,6 @@ def do_bwa_align(
     #status = proc.wait()
 
     # print "BWA Error", err
-
     sam = out.encode('utf-8')
     samdata = sam.splitlines()
 

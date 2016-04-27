@@ -672,6 +672,7 @@ def process_fast5(
             if args.bwa_align is True:
                 if args.verbose is True:
                     print 'bwa aligning....'
+  		    import pdb; pdb.set_trace();
                 init_bwa_threads(
                     args,
                     ref_fasta_hash,
